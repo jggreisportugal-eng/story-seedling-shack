@@ -1,5 +1,4 @@
 import { BookOpen } from "lucide-react";
-import { Link } from "react-router-dom";
 
 interface LogoProps {
   variant?: "light" | "dark";
@@ -20,15 +19,14 @@ const Logo = ({ variant = "dark", size = "md" }: LogoProps) => {
   };
 
   return (
-    <Link
-      to="/"
+    <div
       className={`flex items-center gap-2 font-display font-semibold ${sizeClasses[size]} ${
         variant === "light" ? "text-primary-foreground" : "text-primary"
       }`}
     >
       <BookOpen size={iconSizes[size]} className="text-amber" />
       <span>Contos Diários</span>
-    </Link>
+    </div>
   );
 };
 
