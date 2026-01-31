@@ -35,47 +35,50 @@ const StoryCard = ({
       <Card
         className={`relative overflow-hidden transition-all ${
           isToday
-            ? "border-amber bg-gradient-to-br from-amber/5 to-amber/10 shadow-lg"
+            ? "border-2 border-amber bg-gradient-to-br from-amber/5 to-amber/10 shadow-lg shadow-amber/10"
             : isAvailable
-            ? "cursor-pointer hover:border-amber/50 hover:shadow-md"
-            : "opacity-75"
+            ? "cursor-pointer border-2 border-border hover:border-amber/50 hover:shadow-md"
+            : "opacity-60 border-2 border-dashed border-muted"
         }`}
         onClick={isAvailable ? onClick : undefined}
       >
         {isToday && (
-          <div className="absolute right-0 top-0 flex items-center gap-1 rounded-bl-lg bg-amber px-3 py-1">
-            <Sparkles className="h-3 w-3 text-amber-foreground" />
-            <span className="text-xs font-medium text-amber-foreground">Conto do dia</span>
+          <div className="absolute right-0 top-0 flex items-center gap-1 rounded-bl-lg bg-amber px-3 py-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-amber-foreground" />
+            <span className="text-xs font-bold text-amber-foreground">Conto do dia</span>
           </div>
         )}
 
         <CardHeader className="pb-2">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Calendar className="h-3 w-3" />
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <Calendar className="h-3.5 w-3.5" />
             <span>Dia {day} de {totalDays}</span>
           </div>
-          <CardTitle className="font-display text-xl">{title}</CardTitle>
+          <CardTitle className="font-display text-xl font-bold text-foreground">{title}</CardTitle>
           {excerpt && (
-            <CardDescription className="line-clamp-2 font-body">
+            <CardDescription className="line-clamp-2 font-body text-muted-foreground">
               {excerpt}
             </CardDescription>
           )}
         </CardHeader>
 
         <CardContent>
-          <div className="space-y-2">
-            <Progress value={progress} className="h-1.5" />
+          <div className="space-y-3">
+            <Progress value={progress} className="h-2" />
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs font-medium text-muted-foreground">
                 Progresso: {Math.round(progress)}%
               </span>
               {isAvailable ? (
-                <Button size="sm" className="bg-amber text-amber-foreground hover:bg-amber/90">
+                <Button 
+                  size="sm" 
+                  className="bg-amber text-amber-foreground font-semibold hover:bg-amber/90 shadow-sm"
+                >
                   Ler agora
                 </Button>
               ) : (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <LockKeyhole className="h-3 w-3" />
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <LockKeyhole className="h-3.5 w-3.5" />
                   <span>Disponível em breve</span>
                 </div>
               )}

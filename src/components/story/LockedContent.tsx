@@ -38,19 +38,19 @@ const LockedContent = ({ type, onUnlock }: LockedContentProps) => {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="border-dashed bg-muted/30">
+      <Card className="border-2 border-dashed border-muted bg-muted/20">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 rounded-full bg-muted p-4">
-            <LockKeyhole className="h-8 w-8 text-muted-foreground" />
+            <LockKeyhole className="h-8 w-8 text-foreground" />
           </div>
-          <CardTitle className="font-display">{title}</CardTitle>
-          <CardDescription className="font-body">{description}</CardDescription>
+          <CardTitle className="font-display font-bold text-foreground">{title}</CardTitle>
+          <CardDescription className="font-body text-muted-foreground">{description}</CardDescription>
         </CardHeader>
         {showButton && onUnlock && (
           <CardContent className="text-center">
             <Button
               onClick={onUnlock}
-              className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90"
+              className="gap-2 bg-amber text-amber-foreground font-semibold hover:bg-amber/90 shadow-md shadow-amber/20"
             >
               <Unlock className="h-4 w-4" />
               {buttonText}
