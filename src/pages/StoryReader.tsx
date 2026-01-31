@@ -60,17 +60,21 @@ const StoryReader = () => {
 
   return (
     <PageContainer>
-      {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Header - Fundo azul-noite */}
+      <header className="sticky top-0 z-10 bg-primary text-primary-foreground shadow-md">
         <div className="container flex h-14 items-center justify-between px-4">
           <Link to="/dashboard">
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            >
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </Button>
           </Link>
           
-          <Logo size="sm" />
+          <Logo variant="light" size="sm" />
           
           <div className="w-20" /> {/* Spacer para centrar o logo */}
         </div>
@@ -85,9 +89,9 @@ const StoryReader = () => {
         >
           {/* Meta info */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Dia {story.day} de 30</span>
+            <span className="font-medium">Dia {story.day} de 30</span>
             {story.isAdultContent && (
-              <Badge variant="outline" className="gap-1 border-amber/50 text-amber">
+              <Badge className="gap-1 bg-amber/10 text-amber border-amber/50 font-semibold">
                 <AlertTriangle className="h-3 w-3" />
                 +18
               </Badge>
@@ -95,14 +99,14 @@ const StoryReader = () => {
           </div>
 
           {/* Title */}
-          <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">
+          <h1 className="font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl">
             {story.title}
           </h1>
 
           {/* Separator */}
           <div className="flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
-            <div className="h-1.5 w-1.5 rounded-full bg-amber" />
+            <div className="h-2 w-2 rounded-full bg-amber" />
             <div className="h-px flex-1 bg-border" />
           </div>
 
@@ -122,10 +126,13 @@ const StoryReader = () => {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-8 border-t border-border">
+          <div className="flex items-center justify-between pt-8 border-t-2 border-border">
             {story.hasPrevious ? (
               <Link to={`/conto/${story.id - 1}`}>
-                <Button variant="outline" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  className="gap-2 border-2 border-border hover:border-amber hover:text-amber font-semibold"
+                >
                   <ArrowLeft className="h-4 w-4" />
                   Anterior
                 </Button>
@@ -136,7 +143,7 @@ const StoryReader = () => {
             
             {story.hasNext ? (
               <Link to={`/conto/${story.id + 1}`}>
-                <Button className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90">
+                <Button className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90 font-semibold shadow-md shadow-amber/20">
                   Seguinte
                   <ArrowRight className="h-4 w-4" />
                 </Button>

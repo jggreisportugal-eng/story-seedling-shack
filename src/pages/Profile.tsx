@@ -25,15 +25,19 @@ const Profile = () => {
 
   return (
     <PageContainer>
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur">
+      {/* Header - Fundo azul-noite */}
+      <header className="bg-primary text-primary-foreground shadow-md">
         <div className="container flex h-14 items-center justify-between px-4">
           <Link to="/dashboard">
-            <Button variant="ghost" size="sm" className="gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="gap-2 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+            >
               ← Voltar
             </Button>
           </Link>
-          <Logo size="sm" />
+          <Logo variant="light" size="sm" />
           <div className="w-20" />
         </div>
       </header>
@@ -47,42 +51,46 @@ const Profile = () => {
         >
           {/* Header */}
           <div className="text-center">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber/10">
-              <User className="h-10 w-10 text-amber" />
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber">
+              <User className="h-10 w-10 text-amber-foreground" />
             </div>
-            <h1 className="font-display text-2xl font-semibold">{user.name}</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">{user.name}</h1>
             <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
 
           {/* Profile Details */}
-          <Card>
+          <Card className="border-2 border-border shadow-sm">
             <CardHeader>
-              <CardTitle className="font-display text-lg">Dados da conta</CardTitle>
-              <CardDescription>Informações da sua conta e subscrição</CardDescription>
+              <CardTitle className="font-display text-lg font-bold text-foreground">
+                Dados da conta
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Informações da sua conta e subscrição
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Email */}
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-muted p-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Mail className="h-4 w-4 text-foreground" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Email</p>
+                  <p className="text-sm font-semibold text-foreground">Email</p>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border" />
 
               {/* Subscription */}
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-muted p-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <Shield className="h-4 w-4 text-foreground" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Estado da subscrição</p>
+                  <p className="text-sm font-semibold text-foreground">Estado da subscrição</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge className="bg-amber/10 text-amber hover:bg-amber/20">
+                    <Badge className="bg-amber text-amber-foreground font-semibold">
                       Ativa
                     </Badge>
                     <span className="text-xs text-muted-foreground">
@@ -92,15 +100,15 @@ const Profile = () => {
                 </div>
               </div>
 
-              <Separator />
+              <Separator className="bg-border" />
 
               {/* Age Confirmation */}
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-muted p-2">
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  <CheckCircle className="h-4 w-4 text-foreground" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium">Confirmação de maioridade</p>
+                  <p className="text-sm font-semibold text-foreground">Confirmação de maioridade</p>
                   <p className="text-sm text-muted-foreground">
                     {user.isAdultConfirmed ? "Confirmado" : "Não confirmado"}
                   </p>
@@ -115,7 +123,7 @@ const Profile = () => {
           {/* Logout Button */}
           <Button
             variant="outline"
-            className="w-full gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="w-full gap-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-semibold"
             onClick={handleLogout}
           >
             <LogOut className="h-4 w-4" />
