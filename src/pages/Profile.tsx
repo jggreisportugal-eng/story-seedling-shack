@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Shield, LogOut, CheckCircle } from "lucide-react";
+import { User, Mail, Shield, LogOut, CheckCircle, Sparkles, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,14 +8,16 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import PageContainer from "@/components/layout/PageContainer";
 import Logo from "@/components/ui/Logo";
+import { usePlan } from "@/contexts/PlanContext";
+import { PLAN_CONFIG, PLAN_MESSAGES } from "@/types/plans";
 
 const Profile = () => {
+  const { userPlan, isPremium, getRemainingStories, upgradeToPremium } = usePlan();
+  
   const [user] = useState({
     name: "Maria Santos",
     email: "maria.santos@email.pt",
     isAdultConfirmed: true,
-    subscriptionStatus: "active",
-    subscriptionEnd: "2024-03-15",
   });
 
   const handleLogout = () => {
@@ -85,19 +87,35 @@ const Profile = () => {
               {/* Subscription */}
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-muted p-2">
-                  <Shield className="h-4 w-4 text-foreground" />
+                  {isPremium ? (
+                    <Crown className="h-4 w-4 text-amber" />
+                  ) : (
+                    <Shield className="h-4 w-4 text-foreground" />
+                  )}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-foreground">Estado da subscrição</p>
+                  <p className="text-sm font-semibold text-foreground">Plano</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge className="bg-amber text-amber-foreground font-semibold">
-                      Ativa
+                    <Badge className={isPremium ? "bg-amber text-amber-foreground font-semibold" : "bg-muted text-muted-foreground font-semibold"}>
+                      {isPremium ? "Premium" : "Gratuito"}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      até {new Date(user.subscriptionEnd).toLocaleDateString('pt-PT')}
-                    </span>
+                    {!isPremium && (
+                      <span className="text-xs text-muted-foreground">
+                        {getRemainingStories()} contos restantes este mês
+                      </span>
+                    )}
                   </div>
                 </div>
+                {!isPremium && (
+                  <Button
+                    onClick={upgradeToPremium}
+                    size="sm"
+                    className="bg-amber text-amber-foreground hover:bg-amber/90 font-semibold"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-1" />
+                    Upgrade
+                  </Button>
+                )}
               </div>
 
               <Separator className="bg-border" />
