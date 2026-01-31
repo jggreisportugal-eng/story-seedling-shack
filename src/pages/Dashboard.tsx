@@ -1,21 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, History, User, LogOut } from "lucide-react";
-import { Link } from "react-router-dom";
+import { BookOpen, History, User, LogOut, Sparkles } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import PageContainer from "@/components/layout/PageContainer";
 import Logo from "@/components/ui/Logo";
 import StoryCard from "@/components/story/StoryCard";
+import StoryGenerator from "@/components/story/StoryGenerator";
+import ThirtyDayModeCard from "@/components/story/ThirtyDayModeCard";
+import PlanLimitBanner from "@/components/plan/PlanLimitBanner";
+import UpsellModal from "@/components/modals/UpsellModal";
+import { usePlan } from "@/contexts/PlanContext";
+import { useStoryGeneration } from "@/hooks/useStoryGeneration";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [userName] = useState("Maria");
-  const currentDay = 12;
-  const totalDays = 30;
-  const progress = (currentDay / totalDays) * 100;
+  const [showUpsell, setShowUpsell] = useState(false);
+  
+  const {
+    isPremium,
+    getRemainingStories,
+    upgradeToPremium,
+  } = usePlan();
 
-  // Dados simulados dos contos
-  const stories = [
+  const {
+    isGenerating,
+    generateStory,
+    getStoredStories,
+    startThirtyDayMode,
+    stopThirtyDayMode,
+    getThirtyDayModeState,
+    canGenerateStory,
+    remainingStories,
+  } = useStoryGeneration();
+
+  const thirtyDayState = getThirtyDayModeState();
+  const storedStories = getStoredStories();
+
+  // Calculate progress for 30-day mode
+  const currentDay = thirtyDayState?.currentDay || 1;
+  const totalDays = 30;
+  const progress = thirtyDayState?.isActive ? ((currentDay - 1) / totalDays) * 100 : 0;
+
+  // Sample stories (will be replaced with generated ones)
+  const sampleStories = [
     {
       id: 1,
       title: "O Segredo do Farol",
@@ -32,15 +62,21 @@ const Dashboard = () => {
       isAvailable: true,
       isToday: false,
     },
-    {
-      id: 3,
-      title: "A Última Valsa",
-      excerpt: "Ele prometeu que dançaria com ela uma última vez...",
-      day: 13,
-      isAvailable: false,
-      isToday: false,
-    },
   ];
+
+  const handleGenerateStory = async (theme: string, isAdultContent: boolean) => {
+    await generateStory(theme, isAdultContent);
+  };
+
+  const handleUpgrade = () => {
+    setShowUpsell(true);
+  };
+
+  const handlePurchase = () => {
+    // Simulate upgrade (in production, this would integrate with Hotmart)
+    upgradeToPremium();
+    setShowUpsell(false);
+  };
 
   return (
     <PageContainer>
@@ -82,12 +118,11 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container px-4 py-8">
+      <main className="container px-4 py-8 space-y-8">
         {/* Greeting */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
         >
           <h1 className="font-display text-3xl font-bold text-foreground">
             Olá, {userName}
@@ -97,41 +132,87 @@ const Dashboard = () => {
           </p>
         </motion.div>
 
-        {/* Progress Overview */}
+        {/* Plan Status Banner */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-8 rounded-lg border-2 border-amber/20 bg-gradient-to-r from-amber/5 to-amber/10 p-6 shadow-sm"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="rounded-full bg-amber p-2">
-              <BookOpen className="h-5 w-5 text-amber-foreground" />
-            </div>
-            <div>
-              <p className="font-display font-bold text-foreground">O seu progresso</p>
-              <p className="text-sm text-muted-foreground">
-                Dia {currentDay} de {totalDays}
-              </p>
-            </div>
-          </div>
-          <Progress value={progress} className="h-2" />
-          <p className="mt-2 text-right text-xs font-medium text-amber">
-            {Math.round(progress)}% concluído
-          </p>
+          <PlanLimitBanner
+            remainingStories={remainingStories}
+            isPremium={isPremium}
+            onUpgrade={handleUpgrade}
+          />
         </motion.div>
+
+        {/* 30-Day Mode Progress (if active) */}
+        {thirtyDayState?.isActive && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="rounded-lg border-2 border-amber/20 bg-gradient-to-r from-amber/5 to-amber/10 p-6 shadow-sm"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-full bg-amber p-2">
+                <BookOpen className="h-5 w-5 text-amber-foreground" />
+              </div>
+              <div>
+                <p className="font-display font-bold text-foreground">O seu progresso</p>
+                <p className="text-sm text-muted-foreground">
+                  Dia {currentDay} de {totalDays}
+                </p>
+              </div>
+            </div>
+            <Progress value={progress} className="h-2" />
+            <p className="mt-2 text-right text-xs font-medium text-amber">
+              {Math.round(progress)}% concluído
+            </p>
+          </motion.div>
+        )}
+
+        {/* Story Generator */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <StoryGenerator
+            onGenerate={handleGenerateStory}
+            isGenerating={isGenerating}
+            canGenerate={canGenerateStory}
+            isPremium={isPremium}
+            remainingStories={remainingStories}
+          />
+        </motion.div>
+
+        {/* 30-Day Mode Card (for Premium) */}
+        {isPremium && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <ThirtyDayModeCard
+              isPremium={isPremium}
+              thirtyDayState={thirtyDayState}
+              onStart={startThirtyDayMode}
+              onStop={stopThirtyDayMode}
+            />
+          </motion.div>
+        )}
 
         {/* Stories */}
         <div className="space-y-4">
           <h2 className="font-display text-xl font-bold text-foreground">Os seus contos</h2>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {stories.map((story, index) => (
+            {sampleStories.map((story, index) => (
               <motion.div
                 key={story.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + index * 0.1 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
               >
                 <StoryCard
                   title={story.title}
@@ -142,7 +223,7 @@ const Dashboard = () => {
                   isToday={story.isToday}
                   onClick={() => {
                     if (story.isAvailable) {
-                      window.location.href = `/conto/${story.id}`;
+                      navigate(`/conto/${story.id}`);
                     }
                   }}
                 />
@@ -151,6 +232,13 @@ const Dashboard = () => {
           </div>
         </div>
       </main>
+
+      {/* Upsell Modal */}
+      <UpsellModal
+        open={showUpsell}
+        onClose={() => setShowUpsell(false)}
+        onPurchase={handlePurchase}
+      />
     </PageContainer>
   );
 };
