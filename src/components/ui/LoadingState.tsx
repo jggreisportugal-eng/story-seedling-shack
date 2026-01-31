@@ -12,8 +12,10 @@ const LoadingState = ({ message = "A preparar o seu conto…" }: LoadingStatePro
       animate={{ opacity: 1 }}
       className="flex flex-col items-center justify-center gap-4 py-16"
     >
-      <Loader2 className="h-8 w-8 animate-spin text-amber" />
-      <p className="font-body text-muted-foreground">{message}</p>
+      <div className="rounded-full bg-amber/10 p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-amber" />
+      </div>
+      <p className="font-body font-medium text-muted-foreground">{message}</p>
     </motion.div>
   );
 };

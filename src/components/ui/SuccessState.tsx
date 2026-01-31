@@ -20,12 +20,12 @@ const SuccessState = ({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-        className="rounded-full bg-amber/10 p-3"
+        className="rounded-full bg-amber/10 p-4"
       >
         <CheckCircle className="h-8 w-8 text-amber" />
       </motion.div>
       <div className="space-y-2">
-        <h3 className="font-display text-lg font-semibold text-foreground">{title}</h3>
+        <h3 className="font-display text-lg font-bold text-foreground">{title}</h3>
         <p className="font-body text-sm text-muted-foreground">{message}</p>
       </div>
     </motion.div>
