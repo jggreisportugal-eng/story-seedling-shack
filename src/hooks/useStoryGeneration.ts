@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Story, ThirtyDayModeState, PLAN_MESSAGES } from "@/types/plans";
 import { usePlanState } from "./usePlanState";
 import { useToast } from "./use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const STORIES_STORAGE_KEY = "contos-diarios-stories";
 const THIRTY_DAY_STORAGE_KEY = "contos-diarios-thirty-day-mode";
@@ -127,15 +128,41 @@ export const useStoryGeneration = () => {
     setIsGenerating(true);
 
     try {
-      // Simulate story generation (in production, this would call an AI API)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Call rapid-responder Edge Function
+      const { data, error } = await supabase.functions.invoke('rapid-responder', {
+        body: {
+          theme: theme,
+          ageGroup: isAdultContent ? 'adultos' : 'geral',
+          style: 'neutro'
+        }
+      });
 
+      if (error) {
+        console.error('Erro da Edge Function:', error);
+        if (error.message?.includes('Limite')) {
+          toast({
+            title: "Limite atingido",
+            description: "Atingiu o limite de histórias. Tente novamente mais tarde.",
+            variant: "destructive",
+          });
+          return null;
+        }
+        throw error;
+      }
+
+      if (!data || !data.success) {
+        const errorMsg = data?.error || 'Resposta inválida da API';
+        console.error('Erro na resposta:', errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      // Create story with real AI content
       const story: Story = {
-        id: generateId(),
-        title: generatePlaceholderTitle(theme),
-        content: generatePlaceholderContent(theme),
+        id: data.story.id || generateId(),
+        title: generateTitleFromTheme(theme),
+        content: data.story.content,
         theme,
-        createdAt: new Date().toISOString(),
+        createdAt: data.story.created_at || new Date().toISOString(),
         isAdultContent,
       };
 
@@ -145,14 +172,15 @@ export const useStoryGeneration = () => {
 
       toast({
         title: "Conto gerado!",
-        description: PLAN_MESSAGES.STORY_GENERATED,
+        description: `${data.story.word_count || 500} palavras geradas com sucesso.`,
       });
 
       return story;
     } catch (error) {
+      console.error('Erro ao gerar conto:', error);
       toast({
         title: "Erro",
-        description: "Ocorreu um erro ao gerar o conto. Tente novamente.",
+        description: error instanceof Error ? error.message : "Ocorreu um erro ao gerar o conto. Tente novamente.",
         variant: "destructive",
       });
       return null;
@@ -221,8 +249,8 @@ export const useStoryGeneration = () => {
   };
 };
 
-// Placeholder content generators (will be replaced with AI generation)
-function generatePlaceholderTitle(theme: string): string {
+// Title generator based on theme
+function generateTitleFromTheme(theme: string): string {
   const titles: Record<string, string[]> = {
     romance: ["O Encontro Inesperado", "Cartas de Amor", "A Promessa do Farol"],
     suspense: ["Sombras na Noite", "O Segredo da Casa Velha", "A Última Testemunha"],
@@ -232,27 +260,13 @@ function generatePlaceholderTitle(theme: string): string {
     misterio: ["O Enigma do Museu", "Pegadas na Areia", "A Chave de Bronze"],
     "ficcao-cientifica": ["2147: A Nova Terra", "Sinais do Espaço", "O Último Androide"],
     historico: ["Lisboa, 1755", "A Corte dos Segredos", "Navegadores"],
+    erotico: ["Noite de Seda", "O Convite", "Segredos Partilhados"],
+    "romance-adulto": ["Paixão Proibida", "Entre Lençóis", "O Reencontro"],
     default: ["Um Conto Especial", "A História de Hoje", "Palavras ao Vento"],
   };
 
-  const themesTitles = titles[theme] || titles.default;
-  return themesTitles[Math.floor(Math.random() * themesTitles.length)];
-}
-
-function generatePlaceholderContent(theme: string): string {
-  return `
-    Este é um conto de ${theme} gerado especialmente para si.
-
-    A história começa numa manhã de nevoeiro, quando o sol ainda tentava penetrar as nuvens cinzentas que cobriam a cidade antiga. As ruas de pedra brilhavam com a humidade da noite, refletindo as primeiras luzes das montras que começavam a acender.
-
-    Maria caminhava devagar, os passos ecoando no silêncio da madrugada. Tinha nas mãos uma carta amarelada, encontrada entre os pertences da avó que partira há uma semana. Uma carta que mudaria tudo o que ela pensava saber sobre a sua família.
-
-    "Minha querida neta," começava a carta, numa caligrafia elegante e firme, "quando leres estas palavras, já não estarei contigo. Mas há segredos que precisam de ser contados, verdades que guardei durante uma vida inteira..."
-
-    Maria sentou-se no banco de pedra junto à fonte da praça. O coração batia forte enquanto os olhos percorriam cada linha, cada palavra cuidadosamente escolhida. A história da avó era muito mais rica e complexa do que alguma vez imaginara.
-
-    E assim começava uma nova jornada de descoberta.
-  `;
+  const themeTitles = titles[theme] || titles.default;
+  return themeTitles[Math.floor(Math.random() * themeTitles.length)];
 }
 
 export default useStoryGeneration;
