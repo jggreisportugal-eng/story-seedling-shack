@@ -115,14 +115,9 @@ export const useSupabaseAuth = () => {
         return { success: false, error: "Tem de ter pelo menos 18 anos para se registar." };
       }
 
-      const redirectUrl = `${window.location.origin}/`;
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: redirectUrl,
-        },
       });
 
       if (error) {
