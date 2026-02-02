@@ -1,24 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PageContainer from "@/components/layout/PageContainer";
 import Logo from "@/components/ui/Logo";
 import AdultContentWarning from "@/components/modals/AdultContentWarning";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const StoryReader = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAdult } = useAuthContext();
   const [showAdultWarning, setShowAdultWarning] = useState(false);
   const [hasConfirmedAge, setHasConfirmedAge] = useState(false);
 
-  // Dados simulados do conto
+  // Parse story ID
+  const storyId = Number(id) || 1;
+
+  // Dados simulados do conto - determinar se é "erotico" pelo ID ou género
+  // Para este exemplo, só o ID "erotico" ou histórias específicas são +18
+  const isEroticContent = id === "erotico";
+  
   const story = {
-    id: Number(id) || 1,
+    id: storyId,
     title: "O Segredo do Farol",
     day: 12,
-    isAdultContent: true,
+    isAdultContent: isEroticContent,
+    genre: id || "romance",
     content: `
       A chuva batia com fúria contra as janelas do velho farol. Maria, a guardiã de setenta e dois anos, conhecia bem aquele som — era a melodia da sua solidão.
 
@@ -34,8 +44,8 @@ const StoryReader = () => {
 
       Aquela carta mudaria tudo o que ela pensava saber sobre a sua própria história.
     `,
-    hasPrevious: true,
-    hasNext: true,
+    hasPrevious: storyId > 1,
+    hasNext: storyId < 30,
   };
 
   const handleConfirmAge = () => {
@@ -43,20 +53,26 @@ const StoryReader = () => {
     setShowAdultWarning(false);
   };
 
-  // Verificar se precisa de confirmação de idade
-  if (story.isAdultContent && !hasConfirmedAge) {
+  const handleNavigate = (direction: "prev" | "next") => {
+    const newId = direction === "prev" ? storyId - 1 : storyId + 1;
+    navigate(`/conto/${newId}`);
+  };
+
+  // Verificar se precisa de confirmação de idade - APENAS para conteúdo erótico
+  if (isEroticContent && !isAdult && !hasConfirmedAge) {
     return (
       <PageContainer>
         <div className="flex min-h-screen items-center justify-center p-4">
           <AdultContentWarning
             open={true}
             onConfirm={handleConfirmAge}
-            onCancel={() => window.history.back()}
+            onCancel={() => navigate(-1)}
           />
         </div>
       </PageContainer>
     );
   }
+
 
   return (
     <PageContainer>
@@ -128,26 +144,26 @@ const StoryReader = () => {
           {/* Navigation */}
           <div className="flex items-center justify-between pt-8 border-t-2 border-border">
             {story.hasPrevious ? (
-              <Link to={`/conto/${story.id - 1}`}>
-                <Button 
-                  variant="outline" 
-                  className="gap-2 border-2 border-border hover:border-amber hover:text-amber font-semibold"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Anterior
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                className="gap-2 border-2 border-border hover:border-amber hover:text-amber font-semibold"
+                onClick={() => handleNavigate("prev")}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Anterior
+              </Button>
             ) : (
               <div />
             )}
             
             {story.hasNext ? (
-              <Link to={`/conto/${story.id + 1}`}>
-                <Button className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90 font-semibold shadow-md shadow-amber/20">
-                  Seguinte
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button 
+                className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90 font-semibold shadow-md shadow-amber/20"
+                onClick={() => handleNavigate("next")}
+              >
+                Seguinte
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             ) : (
               <div />
             )}

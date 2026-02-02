@@ -13,10 +13,11 @@ import PlanLimitBanner from "@/components/plan/PlanLimitBanner";
 import UpsellModal from "@/components/modals/UpsellModal";
 import { usePlan } from "@/contexts/PlanContext";
 import { useStoryGeneration } from "@/hooks/useStoryGeneration";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [userName] = useState("Maria");
+  const { user, signOut } = useAuthContext();
   const [showUpsell, setShowUpsell] = useState(false);
   
   const {
@@ -110,6 +111,10 @@ const Dashboard = () => {
               variant="ghost" 
               size="sm" 
               className="text-primary-foreground/50 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={async () => {
+                await signOut();
+                navigate("/");
+              }}
             >
               <LogOut className="h-4 w-4" />
             </Button>
@@ -119,18 +124,23 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="container px-4 py-8 space-y-8">
-        {/* Greeting */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h1 className="font-display text-3xl font-bold text-foreground">
-            Olá, {userName}
-          </h1>
-          <p className="mt-1 font-body text-muted-foreground">
-            Pronta para mais uma história envolvente?
-          </p>
-        </motion.div>
+        {/* Greeting - use actual user name from metadata */}
+        {(() => {
+          const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Leitor";
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h1 className="font-display text-3xl font-bold text-foreground">
+                Olá, {userName}
+              </h1>
+              <p className="mt-1 font-body text-muted-foreground">
+                {user?.user_metadata?.full_name?.split(" ")[0] === userName ? "Pronto" : "Pronta"} para mais uma história envolvente?
+              </p>
+            </motion.div>
+          );
+        })()}
 
         {/* Plan Status Banner */}
         <motion.div

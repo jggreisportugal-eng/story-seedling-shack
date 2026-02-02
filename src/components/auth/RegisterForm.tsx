@@ -22,6 +22,7 @@ const RegisterForm = () => {
   const { toast } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [gender, setGender] = useState<Gender | "">("");
@@ -31,7 +32,7 @@ const RegisterForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password || !gender || !birthDate) {
+    if (!fullName || !email || !password || !gender || !birthDate) {
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha todos os campos.",
@@ -55,7 +56,8 @@ const RegisterForm = () => {
       email,
       password,
       gender as Gender,
-      birthDate.toISOString()
+      birthDate.toISOString(),
+      fullName
     );
 
     setIsLoading(false);
@@ -98,6 +100,25 @@ const RegisterForm = () => {
 
         <CardContent className="pt-4">
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Full Name */}
+            <div className="space-y-2">
+              <Label htmlFor="fullName" className="font-body font-medium text-foreground">
+                Nome completo
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="O seu nome completo"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="pl-10 bg-background border-border focus:border-amber focus:ring-amber"
+                  required
+                />
+              </div>
+            </div>
+
             {/* Email */}
             <div className="space-y-2">
               <Label htmlFor="email" className="font-body font-medium text-foreground">
@@ -150,7 +171,6 @@ const RegisterForm = () => {
                 Género
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10 pointer-events-none" />
                 <Select value={gender} onValueChange={(value) => setGender(value as Gender)}>
                   <SelectTrigger className="pl-10 bg-background border-border focus:border-amber focus:ring-amber">
                     <SelectValue placeholder="Selecione o seu género" />
