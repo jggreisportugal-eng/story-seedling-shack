@@ -45,25 +45,34 @@ const Dashboard = () => {
   const totalDays = 30;
   const progress = thirtyDayState?.isActive ? ((currentDay - 1) / totalDays) * 100 : 0;
 
-  // Sample stories (will be replaced with generated ones)
-  const sampleStories = [
-    {
-      id: 1,
-      title: "O Segredo do Farol",
-      excerpt: "Numa noite de tempestade, a velha guardiã do farol descobre uma carta que mudará tudo...",
-      day: 12,
-      isAvailable: true,
-      isToday: true,
-    },
-    {
-      id: 2,
-      title: "Cartas ao Desconhecido",
-      excerpt: "Durante anos, ela escreveu cartas que nunca enviou. Até que um dia...",
-      day: 11,
-      isAvailable: true,
-      isToday: false,
-    },
-  ];
+  // Combine stored stories with samples for display
+  const displayStories = storedStories.length > 0 
+    ? storedStories.map((story, index) => ({
+        id: story.id,
+        title: story.title,
+        excerpt: story.content.substring(0, 100) + "...",
+        day: story.day || index + 1,
+        isAvailable: true,
+        isToday: index === 0,
+      }))
+    : [
+        {
+          id: "sample-1",
+          title: "O Segredo do Farol",
+          excerpt: "Numa noite de tempestade, a velha guardiã do farol descobre uma carta que mudará tudo...",
+          day: 12,
+          isAvailable: true,
+          isToday: true,
+        },
+        {
+          id: "sample-2",
+          title: "Cartas ao Desconhecido",
+          excerpt: "Durante anos, ela escreveu cartas que nunca enviou. Até que um dia...",
+          day: 11,
+          isAvailable: true,
+          isToday: false,
+        },
+      ];
 
   const handleGenerateStory = async (theme: string, isAdultContent: boolean) => {
     await generateStory(theme, isAdultContent);
@@ -217,7 +226,7 @@ const Dashboard = () => {
           <h2 className="font-display text-xl font-bold text-foreground">Os seus contos</h2>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {sampleStories.map((story, index) => (
+            {displayStories.map((story, index) => (
               <motion.div
                 key={story.id}
                 initial={{ opacity: 0, y: 20 }}

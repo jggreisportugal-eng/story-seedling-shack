@@ -1,7 +1,6 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Shield, LogOut, CheckCircle, Sparkles, Crown } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,20 +8,20 @@ import { Separator } from "@/components/ui/separator";
 import PageContainer from "@/components/layout/PageContainer";
 import Logo from "@/components/ui/Logo";
 import { usePlan } from "@/contexts/PlanContext";
-import { PLAN_CONFIG, PLAN_MESSAGES } from "@/types/plans";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const Profile = () => {
-  const { userPlan, isPremium, getRemainingStories, upgradeToPremium } = usePlan();
+  const navigate = useNavigate();
+  const { user, signOut, isAdult } = useAuthContext();
+  const { isPremium, getRemainingStories, upgradeToPremium } = usePlan();
   
-  const [user] = useState({
-    name: "Maria Santos",
-    email: "maria.santos@email.pt",
-    isAdultConfirmed: true,
-  });
+  // Get actual user data from auth context
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilizador";
+  const userEmail = user?.email || "";
 
-  const handleLogout = () => {
-    // Será implementado com Supabase
-    console.log("Terminar sessão");
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
   };
 
   return (
@@ -56,8 +55,8 @@ const Profile = () => {
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-amber">
               <User className="h-10 w-10 text-amber-foreground" />
             </div>
-            <h1 className="font-display text-2xl font-bold text-foreground">{user.name}</h1>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
+            <h1 className="font-display text-2xl font-bold text-foreground">{userName}</h1>
+            <p className="text-sm text-muted-foreground">{userEmail}</p>
           </div>
 
           {/* Profile Details */}
@@ -78,7 +77,7 @@ const Profile = () => {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-foreground">Email</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                  <p className="text-sm text-muted-foreground">{userEmail}</p>
                 </div>
               </div>
 
@@ -128,10 +127,10 @@ const Profile = () => {
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-foreground">Confirmação de maioridade</p>
                   <p className="text-sm text-muted-foreground">
-                    {user.isAdultConfirmed ? "Confirmado" : "Não confirmado"}
+                    {isAdult ? "Confirmado" : "Não confirmado"}
                   </p>
                 </div>
-                {user.isAdultConfirmed && (
+                {isAdult && (
                   <CheckCircle className="h-5 w-5 text-amber" />
                 )}
               </div>
