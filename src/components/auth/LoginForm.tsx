@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const LoginForm = () => {
   const navigate = useNavigate();
-  const { login, preferences } = useAuthContext();
+  const { signIn, preferences } = useAuthContext();
   const { toast } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +33,7 @@ const LoginForm = () => {
 
     setIsLoading(true);
 
-    const result = login(email, password);
+    const result = await signIn(email, password);
 
     setIsLoading(false);
 
@@ -44,7 +44,7 @@ const LoginForm = () => {
       });
       
       // If user has preferences, go to dashboard, otherwise to story selection
-      if (preferences && preferences.favoriteGenres.length > 0) {
+      if (preferences && preferences.selected_genres.length > 0) {
         navigate("/dashboard");
       } else {
         navigate("/selecionar-contos");

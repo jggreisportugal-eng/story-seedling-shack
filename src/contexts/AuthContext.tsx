@@ -1,23 +1,27 @@
 import React, { createContext, useContext, ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { User, UserPreferences, Gender } from "@/types/user";
+import { useSupabaseAuth, Profile, Preferences } from "@/hooks/useSupabaseAuth";
+import { User, Session } from "@supabase/supabase-js";
+import { Gender } from "@/types/user";
 
 interface AuthContextType {
   user: User | null;
-  preferences: UserPreferences | null;
+  session: Session | null;
+  profile: Profile | null;
+  preferences: Preferences | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  register: (email: string, password: string, gender: Gender, birthDate: string) => { success: boolean; error?: string };
-  login: (email: string, password: string) => { success: boolean; error?: string };
-  logout: () => void;
-  savePreferences: (genres: string[]) => void;
-  updateLastRead: (genreId: string) => void;
+  isAdult: boolean;
+  signUp: (email: string, password: string, gender: Gender, birthDate: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signOut: () => Promise<void>;
+  savePreferences: (genres: string[]) => Promise<void>;
+  updateLastRead: (genreId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useAuth();
+  const auth = useSupabaseAuth();
 
   return (
     <AuthContext.Provider value={auth}>

@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
-  const { register } = useAuthContext();
+  const { signUp } = useAuthContext();
   const { toast } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +51,7 @@ const RegisterForm = () => {
 
     setIsLoading(true);
 
-    const result = register(
+    const result = await signUp(
       email,
       password,
       gender as Gender,
