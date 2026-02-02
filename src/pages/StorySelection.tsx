@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Heart, Compass, Eye, Rocket, Flame, Check } from "lucide-react";
+import { Heart, Compass, Eye, Rocket, Flame, Check, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PageContainer from "@/components/layout/PageContainer";
@@ -20,15 +20,10 @@ const iconMap = {
 
 const StorySelection = () => {
   const navigate = useNavigate();
-  const { user, savePreferences, isAuthenticated, isAdult } = useAuthContext();
+  const { user, savePreferences, isAdult, signOut } = useAuthContext();
   const { toast } = useToast();
   const [selectedGenres, setSelectedGenres] = useState<GenreId[]>([]);
-
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    navigate("/auth");
-    return null;
-  }
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const toggleGenre = (genreId: GenreId) => {
     setSelectedGenres((prev) =>
@@ -38,7 +33,7 @@ const StorySelection = () => {
     );
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedGenres.length === 0) {
       toast({
         title: "Selecione pelo menos um género",
@@ -48,7 +43,7 @@ const StorySelection = () => {
       return;
     }
 
-    savePreferences(selectedGenres);
+    await savePreferences(selectedGenres);
     
     toast({
       title: "Preferências guardadas!",
@@ -58,20 +53,33 @@ const StorySelection = () => {
     navigate("/dashboard");
   };
 
-  const handleReadNow = (genreId: GenreId) => {
-    // Save this genre as preference if not already selected
-    if (!selectedGenres.includes(genreId)) {
-      savePreferences([...selectedGenres, genreId]);
-    }
+  const handleReadNow = async (genreId: GenreId) => {
+    if (isNavigating) return;
+    setIsNavigating(true);
+
+    // Save this genre as preference
+    const updatedGenres = selectedGenres.includes(genreId) 
+      ? selectedGenres 
+      : [...selectedGenres, genreId];
+    
+    await savePreferences(updatedGenres);
     
     // Navigate to story with selected genre
     navigate(`/conto/${genreId}`);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
   };
 
   // Filter genres based on adult status
   const availableGenres = STORY_GENRES.filter(
     (genre) => !genre.adultOnly || isAdult
   );
+
+  // Get user display name from email
+  const userName = user?.email?.split("@")[0] || "Leitor";
 
   return (
     <PageContainer>
@@ -80,9 +88,19 @@ const StorySelection = () => {
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Logo size="sm" />
-            <p className="text-sm text-muted-foreground">
-              Olá, <span className="font-semibold text-foreground">{user?.email}</span>
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-muted-foreground hidden sm:block">
+                Olá, <span className="font-semibold text-foreground">{userName}</span>
+              </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </header>
 
@@ -94,10 +112,10 @@ const StorySelection = () => {
             className="text-center mb-8"
           >
             <h1 className="font-display text-3xl font-bold text-foreground mb-2">
-              Escolha os seus géneros favoritos
+              Bem-vindo, {userName}!
             </h1>
             <p className="text-muted-foreground font-body">
-              Selecione os tipos de histórias que mais lhe interessam
+              Escolha os géneros de histórias que mais lhe interessam
             </p>
           </motion.div>
 
@@ -147,6 +165,7 @@ const StorySelection = () => {
                         variant="outline"
                         size="sm"
                         className="w-full"
+                        disabled={isNavigating}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleReadNow(genre.id);
