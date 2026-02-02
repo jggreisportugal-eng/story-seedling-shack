@@ -11,7 +11,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   isAdult: boolean;
-  signUp: (email: string, password: string, gender: Gender, birthDate: string) => Promise<{ success: boolean; error?: string }>;
+  signUp: (email: string, password: string, gender: Gender, birthDate: string, fullName?: string) => Promise<{ success: boolean; error?: string }>;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signOut: () => Promise<void>;
   savePreferences: (genres: string[]) => Promise<void>;

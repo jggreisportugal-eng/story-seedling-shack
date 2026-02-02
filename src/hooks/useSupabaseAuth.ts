@@ -107,7 +107,8 @@ export const useSupabaseAuth = () => {
       email: string,
       password: string,
       gender: Gender,
-      birthDate: string
+      birthDate: string,
+      fullName?: string
     ): Promise<{ success: boolean; error?: string }> => {
       const age = calculateAge(birthDate);
       
@@ -118,6 +119,11 @@ export const useSupabaseAuth = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName || "",
+          },
+        },
       });
 
       if (error) {
