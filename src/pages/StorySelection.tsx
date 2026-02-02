@@ -20,7 +20,7 @@ const iconMap = {
 
 const StorySelection = () => {
   const navigate = useNavigate();
-  const { user, savePreferences, isAuthenticated } = useAuthContext();
+  const { user, savePreferences, isAuthenticated, isAdult } = useAuthContext();
   const { toast } = useToast();
   const [selectedGenres, setSelectedGenres] = useState<GenreId[]>([]);
 
@@ -70,7 +70,7 @@ const StorySelection = () => {
 
   // Filter genres based on adult status
   const availableGenres = STORY_GENRES.filter(
-    (genre) => !genre.adultOnly || (user?.isAdult ?? false)
+    (genre) => !genre.adultOnly || isAdult
   );
 
   return (
@@ -162,7 +162,7 @@ const StorySelection = () => {
           </div>
 
           {/* Adult Content Notice */}
-          {!user?.isAdult && (
+          {!isAdult && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
