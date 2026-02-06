@@ -115,7 +115,9 @@ Os teus contos têm sempre um início intrigante, desenvolvimento envolvente e u
     const conflito = getRandomElement(elements.conflitos);
     const reviravolta = getRandomElement(elements.reviravoltas);
 
-    const userPrompt = `Escreve um conto curto de ${themeLabel} com cerca de 500 palavras, ${isAdult ? 'para um público adulto, com uma abordagem sofisticada e madura.' : 'adequado para todos os públicos.'}
+    const userPrompt = `Escreve um conto completo de ${themeLabel} com EXATAMENTE 500-600 palavras (MÍNIMO 500 PALAVRAS OBRIGATÓRIO), ${isAdult ? 'para um público adulto, com uma abordagem sofisticada e madura.' : 'adequado para todos os públicos.'}
+
+**⚠️ IMPORTANTE:** O conto DEVE ter entre 500-600 palavras. NÃO pares antes de completar a história inteira com início, desenvolvimento e final satisfatório.
 
 **Elementos narrativos obrigatórios:**
 - **Personagens:** ${personagem}
@@ -123,7 +125,12 @@ Os teus contos têm sempre um início intrigante, desenvolvimento envolvente e u
 - **Conflito:** ${conflito}
 - **Reviravolta:** ${reviravolta}
 
-Desenvolve a narrativa com descrições vívidas, diálogos naturais e emoções autênticas. Começa diretamente com a ação, sem título.`;
+**Estrutura obrigatória:**
+- **Início envolvente** (100-150 palavras): Apresenta personagens e cenário de forma cativante
+- **Desenvolvimento rico** (250-300 palavras): Desenvolve o conflito com descrições vívidas, diálogos naturais e emoções autênticas
+- **Clímax e resolução** (150-200 palavras): Incorpora a reviravolta e conclui a história de forma satisfatória
+
+Começa diretamente com a ação, sem título. Usa Português de Portugal (PT-PT).`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -137,8 +144,8 @@ Desenvolve a narrativa com descrições vívidas, diálogos naturais e emoções
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        max_tokens: 1500,
-        temperature: 0.9,
+        max_tokens: 2000,
+        temperature: 0.8,
       }),
     });
 
