@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
@@ -9,19 +9,36 @@ import Logo from "@/components/ui/Logo";
 import AdultContentWarning from "@/components/modals/AdultContentWarning";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { getStoryById } from "@/data/stories";
+import { useStoryGeneration } from "@/hooks/useStoryGeneration";
 
 const StoryReader = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdult } = useAuthContext();
+  const { getStoredStories } = useStoryGeneration();
   const [showAdultWarning, setShowAdultWarning] = useState(false);
   const [hasConfirmedAge, setHasConfirmedAge] = useState(false);
 
   // Parse story ID
   const storyId = id || "sample-1";
 
-  // Buscar o conto pelos dados mockados
-  const storyData = getStoryById(storyId);
+  // Buscar o conto: primeiro nos gerados, depois nos mockados
+  const storyData = useMemo(() => {
+    // 1. Buscar nos contos gerados (localStorage)
+    const generatedStories = getStoredStories();
+    const generatedStory = generatedStories.find(s => s.id === storyId);
+    
+    if (generatedStory) {
+      return {
+        ...generatedStory,
+        day: generatedStory.day || 1,
+        genre: generatedStory.theme || "geral",
+      };
+    }
+    
+    // 2. Se não encontrar, buscar nos mockados
+    return getStoryById(storyId);
+  }, [storyId, getStoredStories]);
 
   // Se não encontrar o conto, redirecionar para o dashboard
   useEffect(() => {
