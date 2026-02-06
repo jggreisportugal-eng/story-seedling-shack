@@ -21,6 +21,19 @@ const PlanContext = createContext<PlanContextType | undefined>(undefined);
 export const PlanProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuthContext();
   const planState = usePlanState(user?.id);
+  
+  // Check if user is using master password
+  const masterAuth = typeof window !== 'undefined' 
+    ? localStorage.getItem("contos-diarios-master-auth") 
+    : null;
+  const isMasterAuth = !!masterAuth;
+
+  // Force upgrade to premium for master auth users
+  React.useEffect(() => {
+    if (isMasterAuth && planState.userPlan.type !== "PREMIUM") {
+      planState.upgradeToPremium();
+    }
+  }, [isMasterAuth, planState]);
 
   return (
     <PlanContext.Provider value={planState}>
