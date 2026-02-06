@@ -8,6 +8,7 @@ import PageContainer from "@/components/layout/PageContainer";
 import Logo from "@/components/ui/Logo";
 import AdultContentWarning from "@/components/modals/AdultContentWarning";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { getStoryById } from "@/data/stories";
 
 const StoryReader = () => {
   const { id } = useParams();
@@ -17,35 +18,29 @@ const StoryReader = () => {
   const [hasConfirmedAge, setHasConfirmedAge] = useState(false);
 
   // Parse story ID
-  const storyId = Number(id) || 1;
+  const storyId = id || "sample-1";
 
-  // Dados simulados do conto - determinar se é "erotico" pelo ID ou género
-  // Para este exemplo, só o ID "erotico" ou histórias específicas são +18
-  const isEroticContent = id === "erotico";
-  
+  // Buscar o conto pelos dados mockados
+  const storyData = getStoryById(storyId);
+
+  // Se não encontrar o conto, redirecionar para o dashboard
+  useEffect(() => {
+    if (!storyData) {
+      navigate("/dashboard");
+    }
+  }, [storyData, navigate]);
+
+  if (!storyData) {
+    return null;
+  }
+
+  // Determinar se é conteúdo adulto
+  const isEroticContent = storyData.isAdultContent;
+
   const story = {
-    id: storyId,
-    title: "O Segredo do Farol",
-    day: 12,
-    isAdultContent: isEroticContent,
-    genre: id || "romance",
-    content: `
-      A chuva batia com fúria contra as janelas do velho farol. Maria, a guardiã de setenta e dois anos, conhecia bem aquele som — era a melodia da sua solidão.
-
-      Há quarenta anos que vivia ali, no alto daquele rochedo batido pelo mar. Quarenta anos a acender a luz que guiava os barcos perdidos. Quarenta anos a guardar um segredo que ninguém mais conhecia.
-
-      Naquela noite, porém, algo era diferente. Enquanto verificava o mecanismo da lanterna, os seus dedos encontraram algo que não deveria estar ali: um envelope amarelado, escondido numa fresta do metal.
-
-      O coração de Maria saltou. Reconheceu imediatamente a letra do remetente — aquela caligrafia elegante que tantas vezes tinha visto antes, há uma vida inteira.
-
-      "Minha querida Maria," começava a carta, "se estás a ler isto, é porque finalmente encontraste coragem para olhar para o passado..."
-
-      Maria sentou-se na velha cadeira junto à janela, o envelope a tremer nas suas mãos envelhecidas. Lá fora, a tempestade rugia. Dentro dela, uma tempestade ainda maior estava prestes a despertar.
-
-      Aquela carta mudaria tudo o que ela pensava saber sobre a sua própria história.
-    `,
-    hasPrevious: storyId > 1,
-    hasNext: storyId < 30,
+    ...storyData,
+    hasPrevious: storyData.day > 1,
+    hasNext: storyData.day < 30,
   };
 
   const handleConfirmAge = () => {
@@ -54,8 +49,11 @@ const StoryReader = () => {
   };
 
   const handleNavigate = (direction: "prev" | "next") => {
-    const newId = direction === "prev" ? storyId - 1 : storyId + 1;
-    navigate(`/conto/${newId}`);
+    // Calcular o próximo ID baseado no dia atual
+    const currentDay = storyData.day;
+    const nextDay = direction === "prev" ? currentDay - 1 : currentDay + 1;
+    const nextId = `sample-${nextDay}`;
+    navigate(`/conto/${nextId}`);
   };
 
   // Verificar se precisa de confirmação de idade - APENAS para conteúdo erótico
