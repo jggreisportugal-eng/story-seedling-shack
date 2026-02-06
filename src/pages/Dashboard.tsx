@@ -10,6 +10,7 @@ import StoryCard from "@/components/story/StoryCard";
 import StoryGenerator from "@/components/story/StoryGenerator";
 import ThirtyDayModeCard from "@/components/story/ThirtyDayModeCard";
 import PlanLimitBanner from "@/components/plan/PlanLimitBanner";
+import PremiumUpgradeBanner from "@/components/plan/PremiumUpgradeBanner";
 import UpsellModal from "@/components/modals/UpsellModal";
 import { usePlan } from "@/contexts/PlanContext";
 import { useStoryGeneration } from "@/hooks/useStoryGeneration";
@@ -250,6 +251,11 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
+
+        {/* Premium Upgrade Banner (apenas para utilizadores gratuitos) */}
+        {!isPremium && (
+          <PremiumUpgradeBanner onUpgrade={handleUpgrade} />
+        )}
       </main>
 
       {/* Upsell Modal */}
