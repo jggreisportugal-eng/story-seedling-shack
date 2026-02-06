@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,21 +56,11 @@ const StoryReader = () => {
 
   const story = {
     ...storyData,
-    hasPrevious: storyData.day > 1,
-    hasNext: storyData.day < 30,
   };
 
   const handleConfirmAge = () => {
     setHasConfirmedAge(true);
     setShowAdultWarning(false);
-  };
-
-  const handleNavigate = (direction: "prev" | "next") => {
-    // Calcular o próximo ID baseado no dia atual
-    const currentDay = storyData.day;
-    const nextDay = direction === "prev" ? currentDay - 1 : currentDay + 1;
-    const nextId = `sample-${nextDay}`;
-    navigate(`/conto/${nextId}`);
   };
 
   // Verificar se precisa de confirmação de idade - APENAS para conteúdo erótico
@@ -156,32 +146,15 @@ const StoryReader = () => {
             ))}
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center justify-between pt-8 border-t-2 border-border">
-            {story.hasPrevious ? (
-              <Button 
-                variant="outline" 
-                className="gap-2 border-2 border-border hover:border-amber hover:text-amber font-semibold"
-                onClick={() => handleNavigate("prev")}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Anterior
-              </Button>
-            ) : (
-              <div />
-            )}
-            
-            {story.hasNext ? (
-              <Button 
-                className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90 font-semibold shadow-md shadow-amber/20"
-                onClick={() => handleNavigate("next")}
-              >
-                Seguinte
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            ) : (
-              <div />
-            )}
+          {/* Navigation - Apenas voltar ao Dashboard */}
+          <div className="flex justify-center pt-8 border-t-2 border-border">
+            <Button 
+              onClick={() => navigate("/dashboard")}
+              className="gap-2 bg-amber text-amber-foreground hover:bg-amber/90 font-semibold shadow-md shadow-amber/20"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar ao Dashboard
+            </Button>
           </div>
         </motion.article>
       </main>
