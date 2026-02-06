@@ -1,6 +1,7 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { usePlanState } from "@/hooks/usePlanState";
-import { UserPlan, PlanType } from "@/types/plans";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { UserPlan } from "@/types/plans";
 
 interface PlanContextType {
   userPlan: UserPlan;
@@ -18,7 +19,8 @@ interface PlanContextType {
 const PlanContext = createContext<PlanContextType | undefined>(undefined);
 
 export const PlanProvider = ({ children }: { children: ReactNode }) => {
-  const planState = usePlanState();
+  const { user } = useAuthContext();
+  const planState = usePlanState(user?.id);
 
   return (
     <PlanContext.Provider value={planState}>

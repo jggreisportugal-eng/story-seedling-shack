@@ -1,9 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { UserPlan, PlanType, PLAN_CONFIG, getDefaultUserPlan } from "@/types/plans";
 
-const STORAGE_KEY = "contos-diarios-user-plan";
+// Função para gerar chave única por utilizador
+const getStorageKey = (userId: string | undefined) => {
+  if (!userId) return "contos-diarios-user-plan-guest";
+  return `contos-diarios-user-plan-${userId}`;
+};
 
-export const usePlanState = () => {
+export const usePlanState = (userId?: string) => {
+  const STORAGE_KEY = getStorageKey(userId);
+
   const [userPlan, setUserPlan] = useState<UserPlan>(() => {
     if (typeof window === "undefined") return getDefaultUserPlan();
     
@@ -21,8 +27,10 @@ export const usePlanState = () => {
 
   // Persist to localStorage whenever userPlan changes
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userPlan));
-  }, [userPlan]);
+    if (userId) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(userPlan));
+    }
+  }, [userPlan, STORAGE_KEY, userId]);
 
   // Check if we need to reset monthly counter
   const checkMonthlyReset = useCallback(() => {

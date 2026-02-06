@@ -3,15 +3,30 @@ import { Story, ThirtyDayModeState, PLAN_MESSAGES } from "@/types/plans";
 import { usePlanState } from "./usePlanState";
 import { useToast } from "./use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/contexts/AuthContext";
 
-const STORIES_STORAGE_KEY = "contos-diarios-stories";
-const THIRTY_DAY_STORAGE_KEY = "contos-diarios-thirty-day-mode";
+// Funções para gerar chaves únicas por utilizador
+const getStoriesStorageKey = (userId: string | undefined) => {
+  if (!userId) return "contos-diarios-stories-guest";
+  return `contos-diarios-stories-${userId}`;
+};
+
+const getThirtyDayStorageKey = (userId: string | undefined) => {
+  if (!userId) return "contos-diarios-thirty-day-mode-guest";
+  return `contos-diarios-thirty-day-mode-${userId}`;
+};
 
 // Generate unique ID
 const generateId = () => `story-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 export const useStoryGeneration = () => {
   const { toast } = useToast();
+  const { user } = useAuthContext();
+  const userId = user?.id;
+
+  const STORIES_STORAGE_KEY = getStoriesStorageKey(userId);
+  const THIRTY_DAY_STORAGE_KEY = getThirtyDayStorageKey(userId);
+
   const {
     userPlan,
     isPremium,
@@ -20,7 +35,7 @@ export const useStoryGeneration = () => {
     canAccessEroticContent,
     canAccessThirtyDayMode,
     incrementStoryCount,
-  } = usePlanState();
+  } = usePlanState(userId);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStory, setCurrentStory] = useState<Story | null>(null);
@@ -36,14 +51,14 @@ export const useStoryGeneration = () => {
       }
     }
     return [];
-  }, []);
+  }, [STORIES_STORAGE_KEY]);
 
   // Save story to storage
   const saveStory = useCallback((story: Story) => {
     const stories = getStoredStories();
     stories.unshift(story);
-    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories.slice(0, 100))); // Keep last 100
-  }, [getStoredStories]);
+    localStorage.setItem(STORIES_STORAGE_KEY, JSON.stringify(stories.slice(0, 100)));
+  }, [getStoredStories, STORIES_STORAGE_KEY]);
 
   // Get 30-day mode state
   const getThirtyDayModeState = useCallback((): ThirtyDayModeState | null => {
@@ -56,7 +71,7 @@ export const useStoryGeneration = () => {
       }
     }
     return null;
-  }, []);
+  }, [THIRTY_DAY_STORAGE_KEY]);
 
   // Save 30-day mode state
   const saveThirtyDayModeState = useCallback((state: ThirtyDayModeState | null) => {
@@ -65,7 +80,7 @@ export const useStoryGeneration = () => {
     } else {
       localStorage.removeItem(THIRTY_DAY_STORAGE_KEY);
     }
-  }, []);
+  }, [THIRTY_DAY_STORAGE_KEY]);
 
   // Start 30-day mode
   const startThirtyDayMode = useCallback((mainTheme: string): boolean => {
