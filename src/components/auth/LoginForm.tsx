@@ -43,8 +43,12 @@ const LoginForm = () => {
         description: "A redirecionar para a sua área pessoal...",
       });
       
-      // If user has preferences, go to dashboard, otherwise to story selection
-      if (preferences && preferences.selected_genres.length > 0) {
+      // Check if master password was used
+      const masterAuth = localStorage.getItem("contos-diarios-master-auth");
+      if (masterAuth) {
+        // Master auth always goes to dashboard (has mock preferences)
+        navigate("/dashboard");
+      } else if (preferences && preferences.selected_genres.length > 0) {
         navigate("/dashboard");
       } else {
         navigate("/selecionar-contos");

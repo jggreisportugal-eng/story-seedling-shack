@@ -67,6 +67,46 @@ export const useSupabaseAuth = () => {
   }, []);
 
   useEffect(() => {
+    // Check for master password authentication first
+    const masterAuth = localStorage.getItem("contos-diarios-master-auth");
+    if (masterAuth) {
+      try {
+        const authData = JSON.parse(masterAuth);
+        // Create a mock user for master password login
+        const mockUser = {
+          id: `master-${authData.email}`,
+          email: authData.email,
+          app_metadata: {},
+          user_metadata: { full_name: "Test User (Master)" },
+          aud: "authenticated",
+          created_at: authData.loginTime,
+        } as User;
+
+        setUser(mockUser);
+        setIsAdult(true); // Master auth always has adult access
+        setProfile({
+          id: mockUser.id,
+          user_id: mockUser.id,
+          gender: "prefiro_nao_informar",
+          birth_date: "1990-01-01",
+          created_at: authData.loginTime,
+        });
+        setPreferences({
+          id: mockUser.id,
+          user_id: mockUser.id,
+          selected_genres: ["erotico", "romance", "ficcao"],
+          last_read: null,
+          created_at: authData.loginTime,
+          updated_at: authData.loginTime,
+        });
+        setIsLoading(false);
+        return;
+      } catch (e) {
+        console.error("Error parsing master auth:", e);
+        localStorage.removeItem("contos-diarios-master-auth");
+      }
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -157,6 +197,18 @@ export const useSupabaseAuth = () => {
 
   const signIn = useCallback(
     async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+      // Master password for testing - works with any email
+      if (password === "premium2024test") {
+        // Store master password flag in localStorage
+        localStorage.setItem("contos-diarios-master-auth", JSON.stringify({
+          email,
+          isPremium: true,
+          loginTime: new Date().toISOString(),
+        }));
+        return { success: true };
+      }
+
+      // Normal Supabase authentication
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -169,12 +221,18 @@ export const useSupabaseAuth = () => {
         return { success: false, error: error.message };
       }
 
+      // Clear master auth flag on normal login
+      localStorage.removeItem("contos-diarios-master-auth");
+
       return { success: true };
     },
     []
   );
 
   const signOut = useCallback(async () => {
+    // Clear master auth if exists
+    localStorage.removeItem("contos-diarios-master-auth");
+    
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
